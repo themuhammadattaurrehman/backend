@@ -40,3 +40,4 @@ pids
 .cache/
 .npm/
 .eslintcache
+.vercel
