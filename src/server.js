@@ -1,13 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const sequelize = require("./config/db");
-const seedSuperAdmin = require("./seed/superAdmin");
+const sequelize = require("../config/db");
+const seedSuperAdmin = require("../seed/superAdmin");
 
-const authRoutes = require("./routes/authRoutes");
-const notificationRoutes = require("./routes/notificationRoutes");
-const tenantRoutes = require("./routes/tenantRoutes");
-const userRoutes = require("./routes/userRoutes");
+const authRoutes = require("../routes/authRoutes");
+const notificationRoutes = require("../routes/notificationRoutes");
+const tenantRoutes = require("../routes/tenantRoutes");
+const userRoutes = require("../routes/userRoutes");
 
 const app = express();
 
@@ -20,7 +20,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/tenants", tenantRoutes);
 app.use("/api/users", userRoutes);
 
-// Only sync and seed if not in serverless
+// ⚡ Important: Don't use app.listen in production (serverless)
 if (process.env.NODE_ENV !== "production") {
   sequelize
     .sync()
@@ -28,7 +28,9 @@ if (process.env.NODE_ENV !== "production") {
       console.log("✅ Database synced");
       await seedSuperAdmin();
       const PORT = process.env.PORT || 5000;
-      app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+      app.listen(PORT, () =>
+        console.log(`🚀 Server running locally on port ${PORT}`)
+      );
     })
     .catch((err) => {
       console.error("❌ Database sync error:", err);
