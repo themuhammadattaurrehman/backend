@@ -9,7 +9,6 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const tenantRoutes = require("./routes/tenantRoutes");
 const userRoutes = require("./routes/userRoutes");
 
-
 const app = express();
 
 app.use(cors());
@@ -21,18 +20,19 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/tenants", tenantRoutes);
 app.use("/api/users", userRoutes);
 
-sequelize
-  .sync()
-  .then(async () => {
-    console.log("✅ Database synced");
+// Only sync and seed if not in serverless
+if (process.env.NODE_ENV !== "production") {
+  sequelize
+    .sync()
+    .then(async () => {
+      console.log("✅ Database synced");
+      await seedSuperAdmin();
+      const PORT = process.env.PORT || 5000;
+      app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    })
+    .catch((err) => {
+      console.error("❌ Database sync error:", err);
+    });
+}
 
-    // Run SuperAdmin seeder after sync
-    await seedSuperAdmin();
-
-    // Start server
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.error("❌ Database sync error:", err);
-  });
+module.exports = app;
