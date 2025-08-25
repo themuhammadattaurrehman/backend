@@ -5,7 +5,7 @@ const { create, getAll } = require("../controllers/notificationController");
 const router = express.Router();
 
 router.post("/add", auth, create);
-router.get("/", auth, getAll);
+router.get("/:tenantId", auth, getAll);
 
 module.exports = router;
 

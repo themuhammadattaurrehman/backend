@@ -23,7 +23,7 @@ app.use("/api/users", userRoutes);
 // ⚡ Important: Don't use app.listen in production (serverless)
 if (process.env.NODE_ENV !== "production") {
   sequelize
-    .sync()
+    .sync({ alter: true })
     .then(async () => {
       console.log("✅ Database synced");
       await seedSuperAdmin();

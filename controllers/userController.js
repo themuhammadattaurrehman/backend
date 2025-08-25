@@ -80,8 +80,19 @@ exports.getManagersAndUsers = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const managers = await User.findAll({ where: { role: "Manager" } });
-    const users = await User.findAll({ where: { role: "User" } });
+    const tenantId = req.params.tenantId || req.query.tenantId;
+
+    if (!tenantId) {
+      return res.status(400).json({ message: "TenantId is required" });
+    }
+
+    const managers = await User.findAll({
+      where: { role: "Manager", TenantId: tenantId },
+    });
+
+    const users = await User.findAll({
+      where: { role: "User", TenantId: tenantId },
+    });
 
     // Merge both arrays into one
     const allData = [...managers, ...users];

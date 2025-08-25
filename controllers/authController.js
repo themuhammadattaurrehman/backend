@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { User } = require("../models");
 const { generateTokens } = require("../utils/token");
-
+const jwt = require("jsonwebtoken");
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role, TenantId } = req.body;
@@ -48,6 +48,30 @@ exports.login = async (req, res) => {
 
   const tokens = generateTokens(user);
   res.json({ user, ...tokens });
+};
+
+exports.refreshToken = (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ message: "Refresh token missing" });
+  }
+
+  try {
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    // Generate a new access token
+    const newAccessToken = jwt.sign(
+      { id: decoded.id, role: decoded.role, tenantId: decoded.tenantId },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" } // short expiry
+    );
+
+    res.json({ accessToken: newAccessToken });
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid or expired refresh token" });
+  }
 };
 
 
