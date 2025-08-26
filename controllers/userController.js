@@ -1,4 +1,5 @@
-const { User } = require("../models");
+const { User, Tenant } = require("../models");
+
 
 // ✅ Single API for approving/unapproving a user
 exports.setApprovalStatus = async (req, res) => {
@@ -32,10 +33,23 @@ exports.getAdmins = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const admins = await User.findAll({ where: { role: "Admin" } });
+    const admins = await User.findAll({
+      where: { role: "Admin" },
+      include: [
+        {
+          model: Tenant,
+          attributes: ["id", "name"], // only fetch these fields
+        },
+      ],
+      attributes: ["id", "name", "email", "role", "approved"], // add/remove as needed
+    });
+
     res.json(admins);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching admins", error: error.message });
+    res.status(500).json({
+      message: "Error fetching admins",
+      error: error.message,
+    });
   }
 };
 
